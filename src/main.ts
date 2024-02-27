@@ -7,4 +7,6 @@ if (appDiv === null) {
     throw new Error("missing root element to render to")
 }
 
-appController(appDiv).login();
+const app = appController(appDiv);
+
+app.login();

@@ -1,25 +1,26 @@
+import { render } from "./renderer.ts";
+
 export function appController(root: HTMLDivElement) {
 
     const login = async () => {
-        const loginPage: string = await fetch("/views/login.html").then(res => res.text());
+        const page = await render(root, "login");
 
-        root.innerHTML = loginPage;
+        page.querySelector("button")!.onclick = profile;
     }
-    const profile = () => {
-        root.innerHTML = "profile page"
+    const profile = async () => {
+        const page = await render(root, "profile");
+
+        page.querySelector("button")!.onclick = login;
     }
-    const conversations = () => {
-    }
-    const publicChat = () => {
-    }
-    const privateChat = () => {
-    }
+    // const conversations = () => {
+    // }
+    // const publicChat = () => {
+    // }
+    // const privateChat = () => {
+    // }
 
     return {
         login,
-        profile,
-        conversations,
-        publicChat,
-        privateChat
+        profile
     }
 }
