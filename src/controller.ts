@@ -16,6 +16,7 @@ export function appController(root: HTMLDivElement) {
     let privKey = "";
     const eventIds = new Set();
     const events = [];
+    let eoseReached = false;
 
 
     const login = async () => {
@@ -71,8 +72,12 @@ export function appController(root: HTMLDivElement) {
 
         submitButton!.addEventListener("click", () => sendEvent(messageContent.value));
 
+        function handleEose() {
+            eoseReached = true;
+        }
 
         function handleEvent(event: NostrEvent) {
+
             if (!eventIds.has(event.id)) {
                 events.push(event)
 
@@ -82,7 +87,12 @@ export function appController(root: HTMLDivElement) {
                 newMessage.querySelector("h3")!.innerText = new Date(event.created_at * 1000).toDateString();
                 newMessage.querySelector("p")!.innerText = event.content;
 
-                main.appendChild(newMessage)
+
+                if (eoseReached) {
+                    main.prepend(newMessage)
+                } else {
+                    main.appendChild(newMessage)
+                }
             }
         }
 
@@ -90,7 +100,7 @@ export function appController(root: HTMLDivElement) {
             send(RELAYS, makeKind1(content, privKey, ["t", PUB_CHAT_TAG]))
         }
 
-        socketService(RELAYS, handleEvent, {"#t": [PUB_CHAT_TAG]});
+        socketService(RELAYS, {"#t": [PUB_CHAT_TAG]}, handleEvent, handleEose);
     }
     // const privateChat = () => pool.publish(relays, newEvent{
     // }
