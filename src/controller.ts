@@ -2,13 +2,20 @@ import {render} from "./renderer.ts";
 import {generateSecretKey, getPublicKey} from "nostr-tools/pure";
 import {bytesToHex, hexToBytes} from "@noble/hashes/utils";
 import {initModal} from "./modalService.ts";
+import {socketService} from "./socketService.ts";
+import {NostrEvent} from "nostr-tools/core";
 
 
 export function appController(root: HTMLDivElement) {
 
+    const PUB_CHAT_TAG = "$$$GFA"
+    const RELAYS = ["wss://relay.nostr.band", "wss://hipstr.cz", "wss://nos.lol"];
+
     let account: any;
     let pubKey = "";
     let privKey = "";
+    const eventIds = new Set();
+    const events = [];
 
 
     const login = async () => {
@@ -21,6 +28,7 @@ export function appController(root: HTMLDivElement) {
         loginButton.addEventListener("click", () => {
             privKey = page.querySelector<HTMLInputElement>("#privatekey")!.value;
             pubKey = (getPublicKey(hexToBytes(privKey)));
+            publicChat();
         })
 
         createAccountButton.addEventListener("click", () => {
@@ -46,8 +54,29 @@ export function appController(root: HTMLDivElement) {
     }
     // const conversations = () => {
     // }
-    // const publicChat = () => {
-    // }
+    const publicChat = async () => {
+        const page = await render(root, "chat");
+
+        const main = page.querySelector("main");
+        const messageTemp = page.querySelector("template");
+
+
+        function handleEvent(event: NostrEvent) {
+            if (!eventIds.has(event.id)) {
+                events.push(event)
+
+                const newMessage = messageTemp!.content.cloneNode(true) as Element;
+
+                newMessage.querySelector("h2")!.innerText = event.pubkey;
+                newMessage.querySelector("h3")!.innerText = new Date(event.created_at * 1000).toDateString();
+                newMessage.querySelector("p")!.innerText = event.content;
+
+                main.appendChild(newMessage)
+            }
+        }
+
+        socketService(RELAYS, handleEvent, {"#t": [PUB_CHAT_TAG]});
+    }
     // const privateChat = () => {
     // }
 
