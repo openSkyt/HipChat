@@ -13,6 +13,14 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+dialog {
+  background: white;
+  color: black;
+  border: none;
+  border-radius: 1rem;
+  padding: 3.5rem;
+}
+
 a {
   font-weight: 500;
   color: #646cff;
