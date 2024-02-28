@@ -58,7 +58,7 @@ export function appController(root: HTMLDivElement) {
     const publicChat = async () => {
         const page = await render(root, "chat");
 
-        const main = page.querySelector("main");
+        const eventsEl = page.querySelector(".events");
         const messageTemp = page.querySelector("template");
 
         const submitButton = page.querySelector(".submitButton")
@@ -89,9 +89,9 @@ export function appController(root: HTMLDivElement) {
 
 
                 if (eoseReached) {
-                    main.prepend(newMessage)
+                    eventsEl.prepend(newMessage)
                 } else {
-                    main.appendChild(newMessage)
+                    eventsEl.appendChild(newMessage)
                 }
             }
         }
