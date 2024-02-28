@@ -2,9 +2,9 @@ import {render} from "./renderer.ts";
 import {generateSecretKey, getPublicKey} from "nostr-tools/pure";
 import {bytesToHex, hexToBytes} from "@noble/hashes/utils";
 import {initModal} from "./modalService.ts";
-import {socketService} from "./socketService.ts";
+import {socketService, send} from "./socketService.ts";
 import {NostrEvent} from "nostr-tools/core";
-
+import {makeKind1} from "./eventMaker.ts";
 
 export function appController(root: HTMLDivElement) {
 
@@ -60,6 +60,17 @@ export function appController(root: HTMLDivElement) {
         const main = page.querySelector("main");
         const messageTemp = page.querySelector("template");
 
+        const submitButton = page.querySelector(".submitButton")
+        const messageContent = page.querySelector("#messageInput")!;
+        const messageForm = page.querySelector("form");
+
+        messageForm!.onsubmit = (event) => {
+            event.preventDefault();
+            sendEvent(messageContent.value)
+        };
+
+        submitButton!.addEventListener("click", () => sendEvent(messageContent.value));
+
 
         function handleEvent(event: NostrEvent) {
             if (!eventIds.has(event.id)) {
@@ -75,9 +86,13 @@ export function appController(root: HTMLDivElement) {
             }
         }
 
+        function sendEvent(content:string) {
+            send(RELAYS, makeKind1(content, privKey, ["t", PUB_CHAT_TAG]))
+        }
+
         socketService(RELAYS, handleEvent, {"#t": [PUB_CHAT_TAG]});
     }
-    // const privateChat = () => {
+    // const privateChat = () => pool.publish(relays, newEvent{
     // }
 
 

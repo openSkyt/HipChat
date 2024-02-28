@@ -90,6 +90,38 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+.actionBar {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background-color: #f5f5f5;
+  padding-left: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid #ccc;
+}
+
+.actionBarTextField input {
+  flex-grow: 1;
+  padding: 0.75rem;
+  font-size: 1rem;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  outline: none;
+}
+
+.submitButton {
+  margin-right: 2rem;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background-color: #007bff;
+  color: #fff;
+  cursor: pointer;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
