@@ -2,7 +2,7 @@ import {render} from "./renderer.ts";
 import {generateSecretKey, getPublicKey} from "nostr-tools/pure";
 import {bytesToHex, hexToBytes} from "@noble/hashes/utils";
 import {initModal} from "./modalService.ts";
-import {socketService, send} from "./socketService.ts";
+import {socketService, send, subscribe} from "./socketService.ts";
 import {NostrEvent} from "nostr-tools/core";
 import {makeKind1} from "./eventMaker.ts";
 
@@ -10,6 +10,8 @@ export function appController(root: HTMLDivElement) {
 
     const PUB_CHAT_TAG = "$$$GFA"
     const RELAYS = ["wss://relay.nostr.band", "wss://hipstr.cz", "wss://nos.lol"];
+    const userData = new Map();
+    const ongoingUserRequests = new Map();
 
     let account: any;
     let pubKey = "";
@@ -64,33 +66,50 @@ export function appController(root: HTMLDivElement) {
 
         const eventsEl = page.querySelector(".events");
         const messageTemp = page.querySelector("template");
-
-        const submitButton = page.querySelector(".submitButton")
         const messageContent = page.querySelector("#messageInput")!;
         const messageForm = page.querySelector("form");
 
         messageForm!.onsubmit = (event) => {
             event.preventDefault();
-            sendEvent(messageContent.value)
+            sendEvent(messageContent.value);
+            messageContent.value = "";
         };
-
-        submitButton!.addEventListener("click", () => sendEvent(messageContent.value));
 
         function handleEose() {
             eoseReached = true;
+            fetchMetadata();
         }
 
         function handleEvent(event: NostrEvent) {
 
-            if (!eventIds.has(event.id)) {
+            if (event.kind === 0) {
+                // {kind: 0, pubkey: pubkey, content: content}]
+                const metadata = JSON.parse(event.content);
+                userData.set(event.pubkey, metadata);
+
+                if (ongoingUserRequests.has(event.pubkey)) {
+                    ongoingUserRequests.get(event.pubkey).forEach(el => {
+                        el.innerText = metadata.name;
+                    });
+                    ongoingUserRequests.delete(event.pubkey);
+                }
+            }
+
+            if (!eventIds.has(event.id) && event.kind === 1) {
                 events.push(event)
 
                 const newMessage = messageTemp!.content.cloneNode(true) as Element;
 
-                newMessage.querySelector("h2")!.innerText = event.pubkey;
+                let messagePubkeyElement = newMessage.querySelector("h2")!;
                 newMessage.querySelector("h3")!.innerText = new Date(event.created_at * 1000).toDateString();
                 newMessage.querySelector("p")!.innerText = event.content;
 
+                if (userData.has(event.pubkey)){
+                    messagePubkeyElement.innerText = userData.get(event.pubkey).name
+                } else {
+                    messagePubkeyElement.innerText = event.pubkey;
+                    getUserInfo(event.pubkey, messagePubkeyElement)
+                }
 
                 if (eoseReached) {
                     eventsEl.prepend(newMessage)
@@ -102,6 +121,19 @@ export function appController(root: HTMLDivElement) {
 
         function sendEvent(content:string) {
             send(RELAYS, makeKind1(content, privKey, ["t", PUB_CHAT_TAG]))
+        }
+
+        function getUserInfo(pubKey:string, el:HTMLElement){
+            if (ongoingUserRequests.has(pubKey)) {
+                ongoingUserRequests.get(pubKey).push(el);
+            } else {
+                ongoingUserRequests.set(pubKey, [el]);
+            }
+        }
+
+        function fetchMetadata() {
+            subscribe(RELAYS, {"authors": [...ongoingUserRequests.keys()], "kinds": [0]}, handleEvent, handleEose)
+            //console.log(filter);
         }
 
         socketService(RELAYS, {"#t": [PUB_CHAT_TAG]}, handleEvent, handleEose);

@@ -11,8 +11,14 @@ body {
     line-height: 1.5;
 }
 
-article h1, article h2 {
-    font-size: inherit
+article {
+    padding: 0 1rem;
+}
+
+article h1, article h2, article h3 {
+    font-size: inherit;
+    display: inline;
+
 }
 
 .modal {
@@ -81,14 +87,14 @@ section.chat {
     border-top: 1px solid #ccc;
 }
 
-.actionBarTextField {
+form {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: .7rem;
 }
 
 
-.actionBarTextField input {
+input {
     flex-grow: 1;
     padding: 0.75rem;
     font-size: 1rem;
@@ -98,20 +104,22 @@ section.chat {
     outline: none;
 }
 
-.submitButton {
-    margin-left: 1rem;
+button {
     width: 32px;
     height: 32px;
     border: none;
-    border-radius: 1rem;
     color: #fff;
+    background: none;
     cursor: pointer;
+}
+
+button img {
+    height: 100%;
 }
 
 #app {
     max-width: 100%; /* Set to 100% to take up the full width */
     margin: 0 auto 0;
-    padding-left: 1rem;
     text-align: left;
 }
 

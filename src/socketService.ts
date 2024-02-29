@@ -1,5 +1,6 @@
 import {SimplePool} from 'nostr-tools/pool';
 import {VerifiedEvent} from "nostr-tools/core";
+import {Filter} from "nostr-tools/filter";
 
 
 const pool = new SimplePool()
@@ -33,3 +34,18 @@ export function send(relays: string[], newEvent: VerifiedEvent) {
     console.log(newEvent);
 }
 
+export function subscribe(relays: string[], filter: Filter, onEvent: Function, onEose: Function) {
+    pool.subscribeMany(
+        relays,
+        [
+            filter,
+        ],         {
+            onevent(event) {
+                onEvent(event);
+            },
+            oneose() {
+                onEose();
+            }
+        }
+    )
+}
