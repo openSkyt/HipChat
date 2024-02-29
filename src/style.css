@@ -11,6 +11,10 @@ body {
     line-height: 1.5;
 }
 
+article h1, article h2 {
+    font-size: inherit
+}
+
 .modal {
     padding: 1rem;
     border: none;
@@ -21,7 +25,7 @@ body {
 
 .modal span {
     display: flex;
-    padding: 0.125rem;
+    padding: 0.1rem;
     width: 100%;
     box-sizing: border-box;
     justify-content: space-around;
@@ -58,13 +62,6 @@ body {
 h1 {
     font-size: 3.2em;
     line-height: 1.1;
-}
-
-#app {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 2rem;
-    text-align: center;
 }
 
 section.chat {
@@ -106,7 +103,6 @@ section.chat {
     width: 32px;
     height: 32px;
     border: none;
-    background-color: ;
     border-radius: 1rem;
     color: #fff;
     cursor: pointer;
@@ -115,8 +111,8 @@ section.chat {
 #app {
     max-width: 100%; /* Set to 100% to take up the full width */
     margin: 0 auto 0;
-    padding: 0;
-    text-align: center;
+    padding-left: 1rem;
+    text-align: left;
 }
 
 @media (prefers-color-scheme: light) {
