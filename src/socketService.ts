@@ -11,7 +11,7 @@ export async function socketService(relays: string[], filter: {
                                     onEvent: Function,
                                     onEose: Function) {
 
-    const h = pool.subscribeMany(
+    pool.subscribeMany(
         relays,
         [
             filter,

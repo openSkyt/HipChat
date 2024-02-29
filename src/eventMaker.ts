@@ -1,4 +1,4 @@
-import {finalizeEvent, getPublicKey, verifyEvent} from "nostr-tools/pure";
+import {finalizeEvent, verifyEvent} from "nostr-tools/pure";
 import {hexToBytes} from "@noble/hashes/utils";
 
 

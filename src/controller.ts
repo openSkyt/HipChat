@@ -116,7 +116,7 @@ export function appController(root: HTMLDivElement) {
                 userData.set(event.pubkey, metadata);
 
                 if (ongoingUserRequests.has(event.pubkey)) {
-                    ongoingUserRequests.get(event.pubkey).forEach(el => {
+                    ongoingUserRequests.get(event.pubkey).forEach((el: HTMLElement) => {
                         el.innerText = metadata.name;
                     });
                     ongoingUserRequests.delete(event.pubkey);
@@ -140,9 +140,9 @@ export function appController(root: HTMLDivElement) {
                 }
 
                 if (eoseReached) {
-                    eventsEl.prepend(newMessage)
+                    eventsEl!.prepend(newMessage)
                 } else {
-                    eventsEl.appendChild(newMessage)
+                    eventsEl!.appendChild(newMessage)
                 }
             }
         }
