@@ -8,7 +8,7 @@ import {makeKind1, makeKind0} from "./eventMaker.ts";
 
 export function appController(root: HTMLDivElement) {
 
-    const PUB_CHAT_TAG = "$$$GFA"
+    const PUB_CHAT_TAG = "$GFA"
     const RELAYS = ["wss://relay.nostr.band", "wss://hipstr.cz", "wss://nos.lol"];
     const userData = new Map();
     const ongoingUserRequests = new Map();
