@@ -1,8 +1,17 @@
 <main>
     <h1>Chat</h1>
+    <button class="profileSettings">Profile settings</button>
+
+    <dialog class="modal userSettingsForm" id="userSettingsModal">
+        <form>
+            <label>Username: <input id="userName"></label>
+            <label>Bio: <input id="aboutSection"></label>
+            <label>Profile picture URL<input id="profilePicURL"></label>
+            <button>Submit</button>
+        </form>
+    </dialog>
 
     <div class="events"></div>
-
     <template>
         <article>
             <img alt="">
@@ -15,10 +24,10 @@
 
 <footer>
     <div class="actionBar">
-        <form>
+        <form class="messageForm">
             <input id="messageInput" placeholder="Type your message...">
             <button><img src="/6492707.png"></button>
         </form>
-        </div>
+    </div>
 </footer>
 

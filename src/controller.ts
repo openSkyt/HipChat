@@ -4,7 +4,7 @@ import {bytesToHex, hexToBytes} from "@noble/hashes/utils";
 import {initModal} from "./modalService.ts";
 import {socketService, send, subscribe} from "./socketService.ts";
 import {NostrEvent} from "nostr-tools/core";
-import {makeKind1} from "./eventMaker.ts";
+import {makeKind1, makeKind0} from "./eventMaker.ts";
 
 export function appController(root: HTMLDivElement) {
 
@@ -31,7 +31,7 @@ export function appController(root: HTMLDivElement) {
         loginButton.addEventListener("click", () => {
             privKey = page.querySelector<HTMLInputElement>("#privatekey")!.value;
             pubKey = (getPublicKey(hexToBytes(privKey)));
-            publicChat();
+            publicChat(false);
         })
 
         createAccountButton.addEventListener("click", () => {
@@ -43,7 +43,7 @@ export function appController(root: HTMLDivElement) {
                 page.querySelector("#privKeyModal")!.textContent = "Your private key is: " + privKey;
                 page.querySelector("#pubKeyModal")!.textContent = "Your public key is: " + pubKey;
                 page.querySelector(".close")!.addEventListener("click", () => {
-                    publicChat();
+                    publicChat(true);
                 })
             }
 
@@ -61,17 +61,37 @@ export function appController(root: HTMLDivElement) {
     }
     // const conversations = () => {
     // }
-    const publicChat = async () => {
+    const publicChat = async (showProfileModal:boolean) => {
         const page = await render(root, "chat");
 
         const eventsEl = page.querySelector(".events");
         const messageTemp = page.querySelector("template");
-        const messageContent = page.querySelector("#messageInput")!;
-        const messageForm = page.querySelector("form");
+        const messageContent = page.querySelector<HTMLInputElement>("#messageInput")!;
+        const messageForm = page.querySelector<HTMLFormElement>(".messageForm");
+        const userSettingsForm = page.querySelector<HTMLFormElement>(".userSettingsForm")
+        const modal = page.querySelector("dialog")!;
+        const usernameInput = page.querySelector<HTMLInputElement>("#userName")!;
+        const aboutInput = page.querySelector<HTMLInputElement>("#aboutSection")!;
+        const pfpURLInput = page.querySelector<HTMLInputElement>("#profilePicURL")!;
+        const magicButton = page.querySelector<HTMLButtonElement>(".profileSettings")!;
+
+        if (showProfileModal) {
+            modal.showModal();
+        } else {
+            fetchUserData();
+        }
+
+        magicButton!.addEventListener("click", () => {modal.showModal()})
+
+        userSettingsForm!.onsubmit = (event) => {
+            sendEvent(0);
+            event.preventDefault();
+            modal.close();
+        }
 
         messageForm!.onsubmit = (event) => {
             event.preventDefault();
-            sendEvent(messageContent.value);
+            sendEvent(1);
             messageContent.value = "";
         };
 
@@ -81,6 +101,14 @@ export function appController(root: HTMLDivElement) {
         }
 
         function handleEvent(event: NostrEvent) {
+
+            if (event.kind === 0 && event.pubkey === pubKey) {
+                const metadata = JSON.parse(event.content);
+                console.log(metadata);
+                usernameInput.value = metadata.name;
+                aboutInput.value = metadata.about;
+                pfpURLInput.value = metadata.picture;
+            }
 
             if (event.kind === 0) {
                 // {kind: 0, pubkey: pubkey, content: content}]
@@ -119,8 +147,13 @@ export function appController(root: HTMLDivElement) {
             }
         }
 
-        function sendEvent(content:string) {
-            send(RELAYS, makeKind1(content, privKey, ["t", PUB_CHAT_TAG]))
+        function sendEvent(kind:number) {
+            if (kind === 1) {
+                send(RELAYS, makeKind1(messageContent.value, privKey, ["t", PUB_CHAT_TAG]))
+            }
+            if (kind === 0) {
+                send(RELAYS, makeKind0(usernameInput.value, aboutInput.value, pfpURLInput.value, privKey))
+            }
         }
 
         function getUserInfo(pubKey:string, el:HTMLElement){
@@ -132,9 +165,13 @@ export function appController(root: HTMLDivElement) {
         }
 
         function fetchMetadata() {
-            subscribe(RELAYS, {"authors": [...ongoingUserRequests.keys()], "kinds": [0]}, handleEvent, handleEose)
-            //console.log(filter);
+            subscribe(RELAYS, {"authors": [...ongoingUserRequests.keys()], "kinds": [0]}, handleEvent, () => {})
         }
+
+        function fetchUserData(){
+            subscribe(RELAYS, {"authors": [pubKey], "kinds": [0]}, handleEvent, () => {})
+        }
+
 
         socketService(RELAYS, {"#t": [PUB_CHAT_TAG]}, handleEvent, handleEose);
     }
