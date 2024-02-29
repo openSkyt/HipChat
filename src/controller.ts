@@ -40,8 +40,8 @@ export function appController(root: HTMLDivElement) {
                 account = generateSecretKey();
                 pubKey = getPublicKey(account);
                 privKey = bytesToHex(account);
-                page.querySelector("#privKeyModal")!.textContent = "Your private key is: " + privKey;
-                page.querySelector("#pubKeyModal")!.textContent = "Your public key is: " + pubKey;
+                page.querySelector("#privKeyModal")!.textContent = privKey;
+                page.querySelector("#pubKeyModal")!.textContent = pubKey;
                 page.querySelector(".close")!.addEventListener("click", () => {
                     publicChat(true);
                 })

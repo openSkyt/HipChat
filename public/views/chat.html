@@ -1,12 +1,14 @@
 <main>
-    <h1>Chat</h1>
-    <button class="profileSettings">Profile settings</button>
+    <div class="flex">
+        <h1>Chat</h1>
+        <button class="profileSettings">Profile settings</button>
+    </div>
 
     <dialog class="modal userSettingsForm" id="userSettingsModal">
         <form>
             <label>Username: <input id="userName"></label>
-            <label>Bio: <input id="aboutSection"></label>
-            <label>Profile picture URL<input id="profilePicURL"></label>
+            <label style="display: none;">Bio: <input id="aboutSection"></label>
+            <label style="display: none;">Profile picture URL<input id="profilePicURL"></label>
             <button>Submit</button>
         </form>
     </dialog>

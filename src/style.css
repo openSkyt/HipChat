@@ -21,24 +21,27 @@ article h1, article h2, article h3 {
 
 }
 
+dialog::backdrop {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+label {
+    margin-bottom: 1rem;
+}
+
+label, input {
+    display: block;
+}
+
 .modal {
-    padding: 1rem;
+    padding: 1.5rem 2rem;
     border: none;
     border-radius: 2rem;
     background-color: #cccccc;
     color: black;
 }
 
-.modal span {
-    display: flex;
-    padding: 0.1rem;
-    width: 100%;
-    box-sizing: border-box;
-    justify-content: space-around;
-}
-
 .modal button {
-
     background-color: #888888;
     padding: 0.5rem;
     border-radius: 0.5rem;
@@ -47,7 +50,9 @@ article h1, article h2, article h3 {
 
 .modal button:hover {
     transition: 0.25s;
-    background-color: #1a1a1a;}
+    background-color: #1a1a1a;
+    color: #eee;
+}
 
 
 :root {
@@ -87,15 +92,40 @@ section.chat {
     border-top: 1px solid #ccc;
 }
 
-form {
+.actionBar form {
     display: flex;
+}
+
+.flex {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+}
+
+code {
+    display: block;
+    font-size: 144%;
+}
+
+section.login {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+form {
     align-items: center;
     gap: .7rem;
 }
 
-
 input {
     flex-grow: 1;
+}
+
+input, button {
     padding: 0.75rem;
     font-size: 1rem;
     box-sizing: border-box;
@@ -105,16 +135,15 @@ input {
 }
 
 button {
-    width: 32px;
-    height: 32px;
     border: none;
-    color: #fff;
     background: none;
     cursor: pointer;
 }
 
 button img {
     height: 100%;
+    width: 32px;
+    height: 32px;
 }
 
 #app {
