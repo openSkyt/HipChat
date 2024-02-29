@@ -161,11 +161,17 @@ export function appController(root: HTMLDivElement) {
                 ongoingUserRequests.get(pubKey).push(el);
             } else {
                 ongoingUserRequests.set(pubKey, [el]);
+
+                if (eoseReached) {
+                    fetchMetadata();
+                }
             }
         }
 
         function fetchMetadata() {
-            subscribe(RELAYS, {"authors": [...ongoingUserRequests.keys()], "kinds": [0]}, handleEvent, () => {})
+            if (ongoingUserRequests.size > 0) {
+                subscribe(RELAYS, {"authors": [...ongoingUserRequests.keys()], "kinds": [0]}, handleEvent, () => {})
+            }
         }
 
         function fetchUserData(){
