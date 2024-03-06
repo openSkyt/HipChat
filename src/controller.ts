@@ -2,14 +2,14 @@ import {render} from "./renderer.ts";
 import {generateSecretKey, getPublicKey} from "nostr-tools/pure";
 import {bytesToHex, hexToBytes} from "@noble/hashes/utils";
 import {initModal} from "./modalService.ts";
-import {socketService, send, subscribe} from "./socketService.ts";
+import {send, subscribe} from "./socketService.ts";
 import {NostrEvent} from "nostr-tools/core";
 import {makeKind1, makeKind0} from "./eventMaker.ts";
 
 export function appController(root: HTMLDivElement) {
 
     const PUB_CHAT_TAG = "$GFA"
-    const RELAYS = ["wss://relay.nostr.band", "wss://hipstr.cz", "wss://nos.lol"];
+    const RELAYS = ["wss://relay.nostr.band", "wss://nos.lol"]; //"wss://hipstr.cz"
     const userData = new Map();
     const ongoingUserRequests = new Map();
 
@@ -179,7 +179,7 @@ export function appController(root: HTMLDivElement) {
         }
 
 
-        socketService(RELAYS, {"#t": [PUB_CHAT_TAG]}, handleEvent, handleEose);
+        subscribe(RELAYS, {"#t": [PUB_CHAT_TAG]}, handleEvent, handleEose);
     }
     // const privateChat = () => pool.publish(relays, newEvent{
     // }

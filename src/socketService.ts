@@ -5,9 +5,7 @@ import {Filter} from "nostr-tools/filter";
 
 const pool = new SimplePool()
 
-export async function socketService(relays: string[], filter: {
-                                        [key: string]: any
-                                    } = {limit: 300},
+export async function subscribe(relays: string[], filter: Filter = {limit: 300},
                                     onEvent: Function,
                                     onEose: Function | undefined) {
 
@@ -32,21 +30,4 @@ export async function socketService(relays: string[], filter: {
 export function send(relays: string[], newEvent: VerifiedEvent) {
     pool.publish(relays, newEvent);
     console.log(newEvent);
-}
-
-export function subscribe(relays: string[], filter: Filter, onEvent: Function, onEose: Function) {
-    return pool.subscribeMany(
-        relays,
-        [
-            filter,
-        ],         {
-            onevent(event) {
-                onEvent(event);
-            },
-            oneose() {
-                //closer.close();
-                onEose();
-            }
-        }
-    )
 }
