@@ -9,7 +9,7 @@ export async function socketService(relays: string[], filter: {
                                         [key: string]: any
                                     } = {limit: 300},
                                     onEvent: Function,
-                                    onEose: Function) {
+                                    onEose: Function | undefined) {
 
     pool.subscribeMany(
         relays,
@@ -21,7 +21,7 @@ export async function socketService(relays: string[], filter: {
                 onEvent(event);
             },
             oneose() {
-                onEose();
+                onEose && onEose();
             }
         }
     )
@@ -35,7 +35,7 @@ export function send(relays: string[], newEvent: VerifiedEvent) {
 }
 
 export function subscribe(relays: string[], filter: Filter, onEvent: Function, onEose: Function) {
-    pool.subscribeMany(
+    return pool.subscribeMany(
         relays,
         [
             filter,
@@ -44,6 +44,7 @@ export function subscribe(relays: string[], filter: Filter, onEvent: Function, o
                 onEvent(event);
             },
             oneose() {
+                //closer.close();
                 onEose();
             }
         }
