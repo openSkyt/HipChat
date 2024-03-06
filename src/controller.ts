@@ -73,7 +73,7 @@ export function appController(root: HTMLDivElement) {
         const usernameInput = page.querySelector<HTMLInputElement>("#userName")!;
         const aboutInput = page.querySelector<HTMLInputElement>("#aboutSection")!;
         const pfpURLInput = page.querySelector<HTMLInputElement>("#profilePicURL")!;
-        const magicButton = page.querySelector<HTMLButtonElement>(".profileSettings")!;
+        const settingsButton = page.querySelector<HTMLButtonElement>(".profileSettings")!;
 
         if (showProfileModal) {
             modal.showModal();
@@ -81,11 +81,11 @@ export function appController(root: HTMLDivElement) {
             fetchUserData();
         }
 
-        magicButton!.addEventListener("click", () => {modal.showModal()})
+        settingsButton?.addEventListener("click", () => {modal.showModal()})
 
         userSettingsForm!.onsubmit = (event) => {
-            sendEvent(0);
             event.preventDefault();
+            sendEvent(0);
             modal.close();
         }
 
@@ -104,7 +104,7 @@ export function appController(root: HTMLDivElement) {
 
             if (event.kind === 0 && event.pubkey === pubKey) {
                 const metadata = JSON.parse(event.content);
-                console.log(metadata);
+
                 usernameInput.value = metadata.name;
                 aboutInput.value = metadata.about;
                 pfpURLInput.value = metadata.picture;
