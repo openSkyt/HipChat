@@ -5,6 +5,7 @@ import {initModal} from "./modalService.ts";
 import {send, subscribe} from "./socketService.ts";
 import {NostrEvent} from "nostr-tools/core";
 import {makeKind1, makeKind0} from "./eventMaker.ts";
+import {chatModel} from "./viewModels/chatViewModel.ts";
 
 export function appController(root: HTMLDivElement) {
 
@@ -54,48 +55,33 @@ export function appController(root: HTMLDivElement) {
         initModal(modal);
     };
 
-    const profile = async () => {
+    const profile = async (pubkey:string) => {
         const page = await render(root, "profile");
 
-        page.querySelector("button")!.onclick = login;
+
+        page.querySelector("img")!.src = userData.get(pubkey).picture;
+
+        page.querySelector("button")!.addEventListener("click", () => publicChat(false));
     }
     // const conversations = () => {
     // }
     const publicChat = async (showProfileModal: boolean) => {
+
+        subscribe(RELAYS, {"#t": [PUB_CHAT_TAG]}, handleEvent, handleEose);
+
         const page = await render(root, "chat");
 
-        const eventsEl = page.querySelector(".events");
-        const messageTemp = page.querySelector("template");
-        const messageContent = page.querySelector<HTMLInputElement>("#messageInput")!;
-        const messageForm = page.querySelector<HTMLFormElement>(".messageForm");
-        const userSettingsForm = page.querySelector<HTMLFormElement>(".userSettingsForm")
-        const modal = page.querySelector("dialog")!;
-        const usernameInput = page.querySelector<HTMLInputElement>("#userName")!;
-        const aboutInput = page.querySelector<HTMLInputElement>("#aboutSection")!;
-        const pfpURLInput = page.querySelector<HTMLInputElement>("#profilePicURL")!;
-        const settingsButton = page.querySelector<HTMLButtonElement>(".profileSettings")!;
+        eoseReached = false;
+        const view = chatModel(page, sendEvent);
+
+
 
         if (showProfileModal) {
-            modal.showModal();
+            view.modal.showModal();
         } else {
             fetchUserData();
         }
 
-        settingsButton?.addEventListener("click", () => {
-            modal.showModal()
-        })
-
-        userSettingsForm!.onsubmit = (event) => {
-            event.preventDefault();
-            sendEvent(0);
-            modal.close();
-        }
-
-        messageForm!.onsubmit = (event) => {
-            event.preventDefault();
-            sendEvent(1);
-            messageContent.value = "";
-        };
 
         function handleEose() {
             eoseReached = true;
@@ -107,9 +93,9 @@ export function appController(root: HTMLDivElement) {
             if (event.kind === 0 && event.pubkey === pubKey) {
                 const metadata = JSON.parse(event.content);
 
-                usernameInput.value = metadata.name;
-                aboutInput.value = metadata.about;
-                pfpURLInput.value = metadata.picture;
+                view.usernameInput.value = metadata.name;
+                view.aboutInput.value = metadata.about;
+                view.pfpURLInput.value = metadata.picture;
             }
 
             if (event.kind === 0) {
@@ -131,10 +117,11 @@ export function appController(root: HTMLDivElement) {
             if (!eventIds.has(event.id) && event.kind === 1) {
                 events.push(event)
 
-                const newMessage = (messageTemp!.content.cloneNode(true) as DocumentFragment).children[0];
+                const newMessage = (view.messageTemp!.content.cloneNode(true) as DocumentFragment).children[0];
 
 
                 let messagePubkeyElement = newMessage.querySelector("h2")!;
+                messagePubkeyElement.addEventListener('click', () => {profile(event.pubkey)});
                 let profilePicElement: HTMLImageElement = newMessage.querySelector("img")!;
                 newMessage.querySelector("h3")!.innerText = new Date(event.created_at * 1000).toDateString();
                 newMessage.querySelector("p")!.innerText = event.content;
@@ -150,19 +137,21 @@ export function appController(root: HTMLDivElement) {
                 }
 
                 if (eoseReached) {
-                    eventsEl!.prepend(newMessage)
+                    view.eventsEl!.prepend(newMessage)
                 } else {
-                    eventsEl!.appendChild(newMessage)
+                    view.eventsEl!.appendChild(newMessage)
                 }
             }
         }
 
+
+
         function sendEvent(kind: number) {
             if (kind === 1) {
-                send(RELAYS, makeKind1(messageContent.value, privKey, ["t", PUB_CHAT_TAG]))
+                send(RELAYS, makeKind1(view.messageContent.value, privKey, ["t", PUB_CHAT_TAG]))
             }
             if (kind === 0) {
-                send(RELAYS, makeKind0(usernameInput.value, aboutInput.value, pfpURLInput.value, privKey))
+                send(RELAYS, makeKind0(view.usernameInput.value, view.aboutInput.value, view.pfpURLInput.value, privKey))
             }
         }
 
@@ -189,13 +178,9 @@ export function appController(root: HTMLDivElement) {
             subscribe(RELAYS, {"authors": [pubKey], "kinds": [0]}, handleEvent, () => {
             })
         }
-
-
-        subscribe(RELAYS, {"#t": [PUB_CHAT_TAG]}, handleEvent, handleEose);
     }
     // const privateChat = () => pool.publish(relays, newEvent{
     // }
-
 
     return {
         login,
