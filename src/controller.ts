@@ -61,7 +61,7 @@ export function appController(root: HTMLDivElement) {
     }
     // const conversations = () => {
     // }
-    const publicChat = async (showProfileModal:boolean) => {
+    const publicChat = async (showProfileModal: boolean) => {
         const page = await render(root, "chat");
 
         const eventsEl = page.querySelector(".events");
@@ -81,7 +81,9 @@ export function appController(root: HTMLDivElement) {
             fetchUserData();
         }
 
-        settingsButton?.addEventListener("click", () => {modal.showModal()})
+        settingsButton?.addEventListener("click", () => {
+            modal.showModal()
+        })
 
         userSettingsForm!.onsubmit = (event) => {
             event.preventDefault();
@@ -117,7 +119,10 @@ export function appController(root: HTMLDivElement) {
 
                 if (ongoingUserRequests.has(event.pubkey)) {
                     ongoingUserRequests.get(event.pubkey).forEach((el: HTMLElement) => {
-                        el.innerText = metadata.name;
+                        el.querySelector("h2")!.innerText = metadata.name;
+                        if (metadata.picture) {
+                            el.querySelector("img")!.src = metadata.picture;
+                        }
                     });
                     ongoingUserRequests.delete(event.pubkey);
                 }
@@ -126,17 +131,22 @@ export function appController(root: HTMLDivElement) {
             if (!eventIds.has(event.id) && event.kind === 1) {
                 events.push(event)
 
-                const newMessage = messageTemp!.content.cloneNode(true) as Element;
+                const newMessage = (messageTemp!.content.cloneNode(true) as DocumentFragment).children[0];
+
 
                 let messagePubkeyElement = newMessage.querySelector("h2")!;
+                let profilePicElement: HTMLImageElement = newMessage.querySelector("img")!;
                 newMessage.querySelector("h3")!.innerText = new Date(event.created_at * 1000).toDateString();
                 newMessage.querySelector("p")!.innerText = event.content;
 
-                if (userData.has(event.pubkey)){
-                    messagePubkeyElement.innerText = userData.get(event.pubkey).name
+                if (userData.has(event.pubkey)) {
+                    messagePubkeyElement.innerText = userData.get(event.pubkey).name;
+                    if (userData.get(event.pubkey).picture) {
+                        profilePicElement.src = userData.get(event.pubkey).picture;
+                    }
                 } else {
                     messagePubkeyElement.innerText = event.pubkey;
-                    getUserInfo(event.pubkey, messagePubkeyElement)
+                    getUserInfo(event.pubkey, newMessage)
                 }
 
                 if (eoseReached) {
@@ -147,7 +157,7 @@ export function appController(root: HTMLDivElement) {
             }
         }
 
-        function sendEvent(kind:number) {
+        function sendEvent(kind: number) {
             if (kind === 1) {
                 send(RELAYS, makeKind1(messageContent.value, privKey, ["t", PUB_CHAT_TAG]))
             }
@@ -156,7 +166,7 @@ export function appController(root: HTMLDivElement) {
             }
         }
 
-        function getUserInfo(pubKey:string, el:HTMLElement){
+        function getUserInfo(pubKey: string, el: Element) {
             if (ongoingUserRequests.has(pubKey)) {
                 ongoingUserRequests.get(pubKey).push(el);
             } else {
@@ -170,12 +180,14 @@ export function appController(root: HTMLDivElement) {
 
         function fetchMetadata() {
             if (ongoingUserRequests.size > 0) {
-                subscribe(RELAYS, {"authors": [...ongoingUserRequests.keys()], "kinds": [0]}, handleEvent, () => {})
+                subscribe(RELAYS, {"authors": [...ongoingUserRequests.keys()], "kinds": [0]}, handleEvent, () => {
+                })
             }
         }
 
-        function fetchUserData(){
-            subscribe(RELAYS, {"authors": [pubKey], "kinds": [0]}, handleEvent, () => {})
+        function fetchUserData() {
+            subscribe(RELAYS, {"authors": [pubKey], "kinds": [0]}, handleEvent, () => {
+            })
         }
 
 

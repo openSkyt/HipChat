@@ -162,3 +162,9 @@ button img {
         background-color: #f9f9f9;
     }
 }
+
+.profilePicture {
+    height: 2rem;
+    width: 2rem;
+    border-radius: 2rem;
+}
